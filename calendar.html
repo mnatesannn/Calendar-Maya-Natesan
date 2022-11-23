@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<head>
+   <title>Calendar</title>
+   <script src="helper_functions.js"></script>
+
+
+   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
+   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-theme-alpine.css">
+   <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+	<div class="container">
+
+		<div class ='register'>
+			<input type="text" id="first_name" placeholder="First Name" />
+			<input type="text" id="last_name" placeholder="Last Name" />
+			<input type="text" id="register_username" placeholder="Username" />
+			<input type="password" id="register_password" placeholder="Password" />
+			<button id="register_btn">Register</button>
+		</div>
+
+		<div id ='login'>
+			<input type="text" id="login_username" placeholder="Username" />
+			<input type="password" id="login_password" placeholder="Password" />
+			<button id="login_btn">Log In</button>
+		</div>
+
+	</div>	
+
+	<p><div id='currMonth'></div></p>
+	
+	<div class = 'buttons'>
+		<div class='pm_but'><button id='prev_month_btn'>Previous Month</button></div>
+		<div class='nm_but'><button id='next_month_btn'>Next Month</button></div>
+	</div>
+
+	<p>
+	<div class = 'events'>
+		<div id ='add_event'>
+		<input type="text" id="event_name" placeholder="Event Name to Add" />
+		<input type='datetime-local' id="event_datetime"/>
+		<!-- <input type="" id="e_time" placeholder="Time" /> -->
+		<button id="event_btn">Add Event</button>
+		</div>
+		<br>
+		<div id ='remove_event'>
+			<input type="text" id="e_name_d" placeholder="Event Name to Delete" />
+			<input type='datetime-local' id="remove_datetime"/>
+			<button id="remove_event_btn">Delete Event</button>
+			</div>
+
+	</div>
+
+	</p>
+
+	<div class= 'c'><div id="calendar" class="ag-theme-alpine" style="height: 570px; width:1050px;"></div></div>
+
+	<!-- LOGIN -->
+	<script>
+
+		const url = '/~mnatesan/module5-group-module5-476325-477223';
+
+	function loginAjax(event) {
+		const username = document.getElementById("login_username").value; // Get the username from the form
+
+		const password = document.getElementById("login_password").value; // Get the password from the form
+		
+		// Make a URL-encoded string for passing POST data:
+		const data = { 'username': username, 'password': password };
+	
+		fetch(url + "/login_ajax.php", {
+				method: 'POST',
+				body: JSON.stringify(data),
+				headers: { 'content-type': 'application/json' }
+			})
+			.then(response => response.json())
+			.then(data => console.log(data.success ? "You've been logged in!" : `You were not logged in ${data.message}`))
+			.catch(err => console.error(err));
+	}
+	
+	document.getElementById("login_btn").addEventListener("click", loginAjax, false);
+	</script>
+
+	<!-- INITIAL CALENDAR DISPLAY -->	
+	<script type="text/javascript" charset="utf-8">
+		var months = {0:'January', 1:'February', 2:'March', 3:'April', 4:'May', 5:'June', 6:'July', 7:'August', 8:'September', 9:'October', 10:'November', 11:'December'};
+		var currentMonth = new Month(2022, 2); // October 2017
+		var currMonth_doc = document.getElementById('currMonth').innerHTML = months[currentMonth.month] + " " + currentMonth.year;
+		// calendar display
+		const columnDefs = [
+		  { field: "Sunday", width : 150},
+		  { field: "Monday", width : 150},
+		  { field: "Tuesday", width : 150},
+		  { field: "Wednesday", width : 150},
+		  { field: "Thursday", width : 150},
+		  { field: "Friday", width : 150},
+		  { field: "Saturday", width : 150},
+
+		];
+	
+		var rowData = [];
+
+		var gridOptions = {
+			columnDefs: columnDefs,
+			rowData: rowData,
+			rowHeight: 100,
+	
+		};
+
+		var eGridDiv = document.querySelector('#calendar');
+
+		new agGrid.Grid(eGridDiv,gridOptions);
+
+		var weeks = currentMonth.getWeeks(); //displaying the current mo
+
+		var new_data = [];
+		
+		for(var w in weeks){
+			var days = weeks[w].getDates();
+			// days contains normal JavaScript Date objects.
+			
+			//alert("Week starting on "+days[0]); //outputs the first day of each week
+			
+			data = [];
+			r_data = {Sunday: '1', Monday: '2', Tuesday: '3', Wednesday: '4', Thursday: '5', Friday: '6', Saturday: '7'};
+			
+			for(var d in days){
+				// You can see console.log() output in your JavaScript debugging tool, like Firebug,
+				// WebWit Inspector, or Dragonfly.
+				var day_num = days[d].toISOString().substring(8,10);
+				if (day_num[0] == '0') {
+					day_num = day_num.substring(1);
+				}
+				//console.log(day_num);
+				data.push(day_num);
+				//append each day to the row data
+			}
+
+			var i = 0;
+			Object.keys(r_data).forEach(function(key) {
+				r_data[key] = data[i];
+				i++;
+				//console.log(r_data[key]);
+			});
+
+			new_data.push(r_data);
+			//append the row to the table (adding the week)
+		
+		}
+
+		gridOptions.api.setRowData(new_data);
+
+		
+	  </script>
+
+
+	<!-- UPDATED CALENDAR DISPLAY -->	
+	<script>
+
+	// Change the month when the "next" button is pressed
+	document.getElementById("next_month_btn").addEventListener("click", function(event){
+		currentMonth = currentMonth.nextMonth(); // Previous month would be currentMonth.prevMonth()
+		currMonth_doc = document.getElementById('currMonth').innerHTML = months[currentMonth.month] + " " + currentMonth.year;;
+		updateCalendar(); // Whenever the month is updated, we'll need to re-render the calendar in HTML
+		//alert("The new month is "+currentMonth.month+" "+currentMonth.year);
+	}, false);
+
+	document.getElementById("prev_month_btn").addEventListener("click", function(event){
+		currentMonth = currentMonth.prevMonth(); // Previous month would be currentMonth.prevMonth()
+		currMonth_doc = document.getElementById('currMonth').innerHTML = months[currentMonth.month] + " " + currentMonth.year;;
+		updateCalendar(); // Whenever the month is updated, we'll need to re-render the calendar in HTML
+		//alert("The new month is "+currentMonth.month+" "+currentMonth.year);
+	}, false);
+
+
+	// This updateCalendar() function only alerts the dates in the currently specified month.  You need to write
+	// it to modify the DOM (optionally using jQuery) to display the days and weeks in the current month.
+	function updateCalendar(){
+		
+		var weeks = currentMonth.getWeeks();
+
+		var new_data = [];
+		
+		for(var w in weeks){
+			var days = weeks[w].getDates();
+			// days contains normal JavaScript Date objects.
+			
+			//alert("Week starting on "+days[0]); //outputs the first day of each week
+			
+			data = [];
+			r_data = {Sunday: '1', Monday: '2', Tuesday: '3', Wednesday: '4', Thursday: '5', Friday: '6', Saturday: '7'};
+			
+			for(var d in days){
+				// You can see console.log() output in your JavaScript debugging tool, like Firebug,
+				// WebWit Inspector, or Dragonfly.
+				var day_num = days[d].toISOString().substring(8,10);
+				if (day_num[0] == '0') {
+					day_num = day_num.substring(1);
+				}
+				//console.log(day_num);
+				data.push(day_num);
+				//append each day to the row data
+			}
+
+			var i = 0;
+			Object.keys(r_data).forEach(function(key) {
+				r_data[key] = data[i];
+				i++;
+				//console.log(r_data[key]);
+			});
+
+			new_data.push(r_data);
+			//append the row to the table (adding the week)
+		
+		}	
+	gridOptions.api.setRowData(new_data);
+	}
+	
+	</script>
+<script src = 'register.js'>
+
+</script>
+<script src = 'create_event.js'>
+
+</script>
+<script src = 'getting_events.js'></script>
+</body>
+</html>

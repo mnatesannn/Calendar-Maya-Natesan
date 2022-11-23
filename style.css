@@ -1,0 +1,60 @@
+body {
+    background-color: lightblue;
+}
+
+#nm_btn,
+#pm_btn {
+    display: inline-block;
+}
+
+#pm_btn {
+    text-align: left;
+}
+
+#currMonth {
+    font-size: large;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+}
+
+.buttons {
+    display: flex;
+}
+
+.nm_but {
+    margin-right: auto;
+}
+.pm_but {
+    margin-left: auto;
+}
+
+.container {
+    display: flex;
+  }
+  
+#add_event {
+    text-align: center;
+}
+
+#remove_event {
+    text-align: center;
+}
+
+.register,
+.login {
+    display: inline-block;
+}
+
+.register {
+    margin-right: auto;
+}
+
+.c {
+    display: flex;
+}
+
+#calendar {
+    margin-right: auto;
+    margin-left: auto;
+}
